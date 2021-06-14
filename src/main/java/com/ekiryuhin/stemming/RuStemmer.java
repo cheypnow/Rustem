@@ -6,7 +6,7 @@ import java.util.regex.Pattern;
 // http://snowball.tartarus.org/algorithms/russian/stemmer.html
 public class RuStemmer implements Stemmer {
 
-    private static final Pattern PERFECT_GERUND = Pattern.compile("((ив|ивши|ившись|ыв|ывши|ывшись)|((ая)?(в|вши|вшись)))$");
+    private static final Pattern PERFECT_GERUND = Pattern.compile("((?<group1>ив|ивши|ившись|ыв|ывши|ывшись)|(([ая])(?<group2>в|вши|вшись)))$");
     private static final Pattern ADJECTIVE = Pattern.compile("(ее|ие|ые|ое|ими|ыми|ей|ий|ый|ой|ем|им|ым|ом|его|ого|ему|ому|их|ых|ую|юю|ая|яя|ою|ею)$");
     private static final Pattern PARTICIPLE = Pattern.compile("((ивш|ывш|ующ)|((?<=[ая])(ем|нн|вш|ющ|щ)))$");
     private static final Pattern REFLEXIVE = Pattern.compile("(с[яь])$");
@@ -60,11 +60,15 @@ public class RuStemmer implements Stemmer {
     // As soon as one of the endings (1) to (3) is found remove it, and terminate step 1.
     private String step1(String rv) {
         // remove perfect gerund ending
-        rv = PERFECT_GERUND.matcher(rv).replaceFirst("");
+        String temp = replacePerfectGerundEnd(rv);
+        if (!rv.equals(temp)) {
+            return temp;
+        }
+
         // remove reflexive ending
         rv = REFLEXIVE.matcher(rv).replaceFirst("");
         // remove adjective ending
-        String temp = ADJECTIVE.matcher(rv).replaceFirst("");
+        temp = ADJECTIVE.matcher(rv).replaceFirst("");
 
         if (!rv.equals(temp)) {
             temp = PARTICIPLE.matcher(temp).replaceFirst("");
@@ -83,6 +87,25 @@ public class RuStemmer implements Stemmer {
         return NOUN.matcher(rv).replaceFirst("");
     }
 
+    private String replacePerfectGerundEnd(String rv) {
+        Matcher matcher = PERFECT_GERUND.matcher(rv);
+        if (!matcher.find()) {
+            return rv;
+        }
+
+        String group1 = matcher.group("group1");
+        if (group1 != null) {
+            return rv.substring(0, rv.lastIndexOf(group1));
+        }
+
+        String group2 = matcher.group("group2");
+        if (group2 != null) {
+            return rv.substring(0, rv.lastIndexOf(group2));
+        }
+
+        return rv;
+    }
+
     // Step 2: If the word ends with и (i), remove it.
     private String step2(String rv) {
         return AND.matcher(rv).replaceFirst("");
@@ -90,7 +113,7 @@ public class RuStemmer implements Stemmer {
 
     // Step 3: Search for a DERIVATIONAL ending in R2 (i.e. the entire ending must lie in R2), and if one is found, remove it.
     private String step3(String rv) {
-        if (DERIVATIONAL.matcher(rv).matches()) {
+        if (DERIVATIONAL.matcher(rv).find()) {
             rv = DERIVATIONAL_SUFFIX.matcher(rv).replaceFirst("");
         }
         return rv;
