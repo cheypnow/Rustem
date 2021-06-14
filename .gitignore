@@ -1,0 +1,11 @@
+.gradle
+target
+.idea
+out
+test-run
+*.log
+*.ipr
+*.iml
+*.iws
+.DS_Store
+/build/
