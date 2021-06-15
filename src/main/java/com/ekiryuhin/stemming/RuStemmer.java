@@ -6,7 +6,7 @@ import java.util.regex.Pattern;
 // http://snowball.tartarus.org/algorithms/russian/stemmer.html
 public class RuStemmer implements Stemmer {
 
-    private static final Pattern RUSSIAN_LETTERS = Pattern.compile("[а-яА-Я]");
+    private static final Pattern RUSSIAN_LETTERS = Pattern.compile("[а-яА-Я]+");
     private static final Pattern PERFECT_GERUND = Pattern.compile("((?<group1>ив|ивши|ившись|ыв|ывши|ывшись)|(([ая])(?<group2>в|вши|вшись)))$");
     private static final Pattern ADJECTIVE = Pattern.compile("(ее|ие|ые|ое|ими|ыми|ей|ий|ый|ой|ем|им|ым|ом|его|ого|ему|ому|их|ых|ую|юю|ая|яя|ою|ею)$");
     private static final Pattern PARTICIPLE = Pattern.compile("((ивш|ывш|ующ)|((?<=[ая])(ем|нн|вш|ющ|щ)))$");
